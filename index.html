@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>Amnesty Oil Spills</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.42.2/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.42.2/mapbox-gl.css' rel='stylesheet' />
+    <link href="https://api.mapbox.com/mapbox-assembly/v0.21.0/assembly.min.css" rel="stylesheet">
+    <script async defer src="https://api.mapbox.com/mapbox-assembly/v0.21.0/assembly.js"></script>
+
+
+    <style>
+      body {
+          margin:0;
+          padding:0;
+      }
+
+      header {
+        position: absolute;
+        display: block;
+        top: 0;
+        left: 0;
+        right: 0;
+        text-transform: uppercase;
+        z-index:1;
+      }
+
+      .logo {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+      }
+
+      #panel {
+        width: 400px;
+        position: absolute;
+        right: 24px;
+        top: 120px;
+        z-index:1;
+      }
+
+      #legend {
+        position: absolute;
+        left: 24px;
+        bottom: 120px;
+        z-index: 1;
+      }
+
+      #map { position:absolute; top:0; bottom:0; width:100%; z-index:-1;}
+
+      dd {
+        margin-left: 0;
+        margin-bottom: 8px;
+        font-weight: bold;
+      }
+      .sidebar {
+        width:120px;
+        }
+      .sidebar > div:first-child button {
+        border-radius:3px 3px 0 0;
+        }
+      .sidebar > div:last-child button {
+        border-radius:0 0 3px 3px;
+        }
+
+       /* Dark attribution */
+      .mapboxgl-ctrl.mapboxgl-ctrl-attrib { background-color:rgba(0,0,0,0.5); }
+      .mapboxgl-ctrl.mapboxgl-ctrl-attrib a { color:#fff; }
+      .mapboxgl-popup-content {
+        background-color: rgba(0,0,0,.75);
+        font-size: 14px;
+        color: #ccc;
+        min-width: 250px;
+        max-width: 400px;
+        box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.1);
+      }
+      dl {
+        margin-bottom: 0;
+      }
+
+      .hide{
+        display: none;
+      }
+
+      /* modal styling */
+      .modal {
+          position: fixed;
+          z-index: 1;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          overflow: auto;
+          background-color: rgb(0,0,0);
+          background-color: rgba(0,0,0,0.4);
+      }
+
+      .modal-content {
+          text-align: center;
+          background-color: #fefefe;
+          margin: 10% auto;
+          padding: 40px;
+          border: 1px solid #888;
+          width: 40%;
+      }
+
+      .close {
+          color: #aaa;
+          float: right;
+          font-size: 28px;
+          font-weight: bold;
+      }
+
+      .close:hover,
+      .close:focus {
+          color: black;
+          text-decoration: none;
+          cursor: pointer;
+    }
+
+      #menu {
+        position: absolute;
+        background: rgba(0,0,0,0.5);
+        padding: 10px;
+        margin-top: 120px;
+      }
+
+      @media (max-width: 600px) {
+        h3 {
+          font-size: 16px!important;
+          padding: 12px!important;
+        }
+
+        #panel {
+          top: auto;
+          bottom: 0;
+          right: 0;
+          width: 100%;
+        }
+
+        .modal-content{
+          width:100%;
+        }
+      }
+
+      .about-header {
+        cursor:pointer;
+      }
+
+      .barrel-one {
+        background-color: #fb6a4a;
+      }
+
+      .barrel-two {
+        background-color: #ef3b2c;
+      }
+
+      .barrel-three {
+        background-color: #cb181d;
+      }
+
+      .barrel-four {
+        background-color: #a50f15;
+      }
+
+      .barrel-five {
+        background-color: #67000d;
+      }
+
+      .barrel-six {
+        background-color: #54030d;
+      }
+
+      .barrel-seven {
+        background-color: #230004;
+      }
+
+      .btn {
+        background-color: #FEFF05;
+      }
+
+    </style>
+</head>
+<body class="prose">
+  <header class="bg-darken75 color-gray-light h-auto-mm h60">
+      <img class="logo" src="./assets/img/logo.png"/>
+      <div class='flex-parent flex-parent--space-between-main w-full'>
+        <div class="flex-child ml240 mt24 mb12"><h3>Niger Delta Oil Spills</h3></div>
+        <div class="about-header flex-child mr24 mt30 mb12 txt-bold"><svg class='icon inline mr6'><use xlink:href='#icon-question'/></svg>About</div>
+      </div>
+  </header>
+
+  <div id="panel" class="bg-darken75 color-gray-light px12 py12">
+    <h4>Companies</h4>
+    <div id="company">
+      <label class='txt-s checkbox-container'>
+        <input type='checkbox' class='js-checkboxes' data-company='Shell'/>
+        <div class='checkbox mr6 checkbox--s-label checkbox--gray'>
+          <svg class='icon'><use xlink:href='#icon-check' /></svg>
+        </div>
+        Shell (Shell Petroleum Development Company)
+    </label>
+      <label class='txt-s checkbox-container'>
+        <input type='checkbox' class='js-checkboxes' data-company='Eni'/>
+        <div class='checkbox mr6 checkbox--s-label checkbox--gray'>
+          <svg class='icon'><use xlink:href='#icon-check' /></svg>
+        </div>
+        Eni (Nigerian Agip Oil Company)
+    </label>
+    </div>
+    <h4>Year</h4>
+    <div id="year" class="grid">
+      <div class="col col--2">
+        <img class="js-play h30 mt12" src="./assets/img/play.png" alt="play button">
+        <img class='hide js-pause h30 mt12 mb12' src="./assets/img/pause.png" alt="play button">
+      </div>
+      <div class="col col--10">
+        <div class='flex-parent flex-parent--space-between-main w-full'>
+           <span class='flex-child'>2011</span>
+           <span class='flex-child'>2017</span>
+        </div>
+        <div class="range">
+            <input class="w-full inline-block color-gray-light" id='slider' list="years" type='range' min='0' max='6' step='1' value='6' />
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- toggle style-->
+  <div class='color-gray-light txt-s' id='menu'>
+    <input id='satellite' type='radio' name='rtoggle' value='satellite' checked='checked'>
+    <label for='basic'>Satellite</label>
+    <input id='light' type='radio' name='rtoggle' value='light'>
+    <label for='streets'>Light</label>
+  </div>
+
+  <div id='map'></div>
+
+  <!-- modal-->
+  <div id='aboutModal' class="modal">
+
+  <!-- modal content -->
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <p><h3>ABOUT NIGER DELTA OIL SPILLS</h3><br>
+        This map contains data collected through the Amnesty International project “Decode Oil Spills”. Thousands of volunteers from around the world contributed time and effort to analyse oil spills investigation reports and help better understand oil spills in Nigeria.<br><br>
+        To read more about oil spills on the Niger Delta, please read the “Negligence in the Niger Delta” report. link to become available on 15th of March<br><br>
+        To read more about Amnesty Decoders, please visit the website <a href='https://decoders.amnesty.org/'>here</a>.<br><br>
+        We’d like to offer a special thanks to volunteers at <a href='https://www.mapbox.com/'>Mapbox</a> for their assistance in creating this map.</p>
+  </div>
+</div>
+<!-- legend -->
+<div id='legend' class='bg-black w240 color-gray-light round shadow-darken10 px12 py12 txt-l'>
+  <strong class='block mb6'>Severity of spill</strong>
+  <div class='grid mb6'>
+    <div class='col barrel-one h60'></div>
+    <div class='col barrel-two h60'></div>
+    <div class='col barrel-three h60'></div>
+    <div class='col barrel-four h60'></div>
+    <div class='col barrel-five h60'></div>
+    <div class='col barrel-six h60'></div>
+    <div class='col barrel-seven h60'></div>
+  </div>
+  <div class='grid txt-s'>
+    <div class='col flex-child--grow'>Small spill</div>
+    <div class='col flex-child--grow align-r'>Large spill</div>
+  </div>
+</div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script>
+  var years = ['2011', '2012', '2013', '2014', '2015', '2016', '2017'];
+  var range = document.getElementById('slider');
+    // to grab checkbox value
+
+  mapboxgl.accessToken = 'pk.eyJ1IjoiYW1pbGx6cGF1Z2giLCJhIjoiY2o0YTdoZm90MHl0ejMzcXE1Y3JudDdjeiJ9.zqXrv4aYQFpAHIesVK7J1w';
+
+  var bounds = [[3.4212049088586127, 3.5398400928501985],
+  [9.147753539602036, 7.2476206933802985]];
+
+  var map = new mapboxgl.Map({
+      container: 'map', // container id
+      style: 'mapbox://styles/mapbox/satellite-v9', //stylesheet location#1
+      center: [6.321595529811589,
+5.511115420484401], // starting position
+      zoom: 8,
+      minZoom: 6,
+      maxZoom: 18,
+      hash: false,
+      maxBounds: bounds
+  });
+
+  $('input.js-checkboxes').prop('checked', true);
+  var nav = new mapboxgl.NavigationControl();
+  map.addControl(nav, 'bottom-right');
+  function mapReset() {
+    if (window.innerWidth < 800) {
+      map.setZoom(6.7);
+    } else {
+        map.setZoom(8);
+    }
+  }
+
+  map.on('style.load', function() {
+    mapReset();
+
+    map.addLayer({
+        'id': 'spills',
+        'type': 'circle',
+        'source': {
+            type: 'vector',
+            url: 'mapbox://amnestydecoders.a5mvlphb'
+        },
+        'source-layer': 'latest_amnesty_oilspills_litr-86outd',
+        'paint': {
+            // color radius based on volume barrels
+            'circle-radius': ['/', ['to-number', ['get', 'volume_barrels']], 50],
+            'circle-opacity': 1,
+            'circle-stroke-color': 'rgba(246, 246, 246, 0.71)',
+            'circle-stroke-width': 1,
+            // tilted the step values a bit since there are a few outliers near the max value
+            "circle-color": [
+                      "step", ["number", ["get", "litres"]],
+                      "#000000",
+                      0, "#fb6a4a",
+                      25000, "#ef3b2c",
+                      50000, "#cb181d",
+                      100000, "#a50f15",
+                      125000, "#67000d",
+                      150000, "#54030d",
+                      804000, "#230004"
+                    ]
+            },
+            'filter': ['!=', 'company', '1272']
+    });
+
+    $('.js-checkboxes').on('change', function(e) {
+      changeLayer();
+    });
+
+    range.addEventListener('input', (e) => {
+      changeLayer();
+    });
+
+    // toggle style
+    var layerList = document.getElementById('menu');
+    var inputs = layerList.getElementsByTagName('input');
+
+    function switchLayer(layer) {
+      var layerId = layer.target.id;
+      map.setStyle('mapbox://styles/mapbox/' + layerId + '-v9');
+    }
+
+    for (var i = 0; i < inputs.length; i++) {
+      inputs[i].onclick = switchLayer;
+    }
+
+    function changeLayer() {
+      var filters = ['all', ['!=', 'company', '1272']];
+      var categories = {};
+      var yearIndex = parseInt(range.value, 10);
+      var checkboxes = $('.js-checkboxes');
+      var yearsFilter = ['in', 'year'];
+      for (c in checkboxes){
+        var checkbox = checkboxes[c];
+        if (checkbox.checked){
+          var id = checkbox.parentElement.parentElement.id;
+          var d = checkbox.dataset[id];
+
+          if (categories[id]){
+            categories[id].push(d)
+          }else{
+            categories[id] = ['in', id, d]
+          }
+        }
+      }
+
+
+      for (key in categories) {
+        var filter = categories[key];
+        filters.push(filter);
+      }
+
+      if (yearIndex === 0 ) {
+        filters.push(yearsFilter.concat(years.slice(0,1)));
+      } else {
+        filters.push(yearsFilter.concat(years.slice(0, yearIndex + 1)));
+      }
+
+      map.setFilter('spills', filters);
+
+    };
+
+    var continuousPlay = function() {
+      var currentYearIndex = parseInt(range.value, 10);
+
+      if (currentYearIndex >= years.length - 1) {
+        currentYearIndex = 0;
+      } else {
+        currentYearIndex += 1;
+      }
+
+      range.value = currentYearIndex;
+      changeLayer();
+
+      currentlyPlaying = setTimeout(() => {
+        continuousPlay();
+      }, 1000);
+    };
+
+    $('.js-play').on('click', function(e) {
+      continuousPlay();
+      $(this).addClass('hide');
+      $('.js-pause').removeClass('hide');
+
+    });
+
+    $('.js-pause').on('click', function(e) {
+      $(this).addClass('hide');
+      $('.js-play').removeClass('hide');
+      clearTimeout(currentlyPlaying);
+    });
+
+    map.on('mousemove', function(event) {
+      if (map.loaded()) {
+        var features = map.queryRenderedFeatures(event.point, {
+          layers: ['spills']
+        });
+        map.getCanvas().style.cursor = features.length ? 'pointer' : '';
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      mapReset();
+    })
+
+    map.on('click', function(event) {
+      var geometry = event.point;
+      var parameters = {
+        layers: ['spills']
+      };
+      var features = map.queryRenderedFeatures(geometry, parameters);
+      var spill = features[0];
+
+      // tooltip should include:
+      // Dates
+      // Volume
+      // Pipeline
+      // Cause Shell/ Eni
+      // Cause Amnesty
+      // Links to images and document
+
+      if (features.length) {
+        var company = spill.properties.company || '—';
+        var date_reported = spill.properties.date_reported || '—';
+        var company_cause = spill.properties.company_cause || '—';
+        var response_time = spill.properties.response_time || '—';
+        var litres = spill.properties.litres || '—';
+        var photo_url = spill.properties.photo_url || '—';
+        var jiv_url = spill.properties.jiv_url || '—';
+
+        var popup = new mapboxgl.Popup()
+          .setLngLat(event.lngLat)
+          .setHTML('<dl>' +
+            '<dt>Company</dt>' +
+            '<dd>' + company + '</dd>' +
+            '<dt>Date Reported</dt>' +
+            '<dd>' + date_reported + '</dd>' +
+            '<dt>Response Time</dt>' +
+            '<dd>' + response_time + ' days</dd>' +
+            '<dt>Cause (declared by company)</dt>' +
+            '<dd>' + company_cause + '</dd>' +
+            '<dt>Volume of Spill (in Litres)</dt>' +
+            '<dd>' + litres + '</dd>' +
+            '<dt>Spill Report</dt>' +
+            '<dd><a target="_blank" href=' + jiv_url + '>Report</a></dd>' +
+            '<dt>Photos</dt>' +
+            '<dd><a target="_blank" href=' + photo_url + '><button class="btn round color-black">View photos</button></a></dd>' +
+          '</dl>')
+          .addTo(map);
+      }
+    });
+  });
+
+  // modal interaction
+  var modal = document.getElementById('aboutModal');
+  modal.style.display = "block";
+
+  var span = document.getElementsByClassName("close")[0];
+  span.onclick = function() {
+      modal.style.display = "none";
+  }
+
+  var aboutHeader = document.getElementsByClassName("about-header")[0];
+  aboutHeader.onclick = function() {
+    document.body.style.cursor = "pointer";
+    modal.style.display = "block";
+  }
+
+  window.onclick = function(event) {
+      if (event.target == modal) {
+          modal.style.display = "none";      }
+  }
+
+  </script>
+
+</body>
+</html>
