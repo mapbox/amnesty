@@ -218,9 +218,8 @@
         <img class='hide js-pause h30 mt12 mb12' src="./assets/img/pause.png" alt="play button">
       </div>
       <div class="col col--10">
-        <div class='flex-parent flex-parent--space-between-main w-full'>
-           <span class='flex-child'>2011</span>
-           <span class='flex-child'>2017</span>
+        <div id='currentYear' class='flex-parent flex-parent--space-between-main w-full'>
+          2017
         </div>
         <div class="range">
             <input class="w-full inline-block color-gray-light" id='slider' list="years" type='range' min='0' max='6' step='1' value='6' />
@@ -378,7 +377,6 @@
         }
       }
 
-
       for (key in categories) {
         var filter = categories[key];
         filters.push(filter);
@@ -386,8 +384,10 @@
 
       if (yearIndex === 0 ) {
         filters.push(yearsFilter.concat(years.slice(0,1)));
+        document.getElementById('currentYear').innerHTML = years[0];
       } else {
         filters.push(yearsFilter.concat(years.slice(0, yearIndex + 1)));
+        document.getElementById('currentYear').innerHTML = years[yearIndex];
       }
 
       map.setFilter('spills', filters);
